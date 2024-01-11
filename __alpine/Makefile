@@ -3,7 +3,7 @@ all:
 	CGO_ENABLED=0 go build . -o ./migrateDockerRegistries.exe
 
 prepare:
-	sudo /opt/bin/install_golang.sh 1.21.5 x86_64
+	sudo /opt/bin/install_golang.sh 1.21.6 x86_64
 	sudo apk update --no-cache
 
 install:
