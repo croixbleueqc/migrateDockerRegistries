@@ -1,7 +1,6 @@
-// nxrmuploader
+// migrateDockerRegistries
 // Written by J.F. Gratton <jean-francois@famillegratton.net>
 // Original filename: src/helpers/changelog.go
-// Original timestamp: 2023/12/31 14:45
 
 package helpers
 

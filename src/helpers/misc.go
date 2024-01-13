@@ -1,7 +1,6 @@
-// nxrmuploader
+// migrateDockerRegistries
 // Written by J.F. Gratton <jean-francois@famillegratton.net>
 // Original filename: src/helpers/misc.go
-// Original timestamp: 2023/12/31 14:46
 
 package helpers
 
