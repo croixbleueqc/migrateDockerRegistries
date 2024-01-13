@@ -1,7 +1,6 @@
 // migrateDockerRegistries
 // Written by J.F. Gratton <jean-francois@famillegratton.net>
 // Original filename: src/helpers/encdec.go
-// Original timestamp: 2024/01/05 13:52
 
 package helpers
 

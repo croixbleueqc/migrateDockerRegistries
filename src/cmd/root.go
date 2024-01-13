@@ -4,9 +4,11 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"migrateDockerRegistries/env"
 	"migrateDockerRegistries/helpers"
+	"migrateDockerRegistries/img"
 	"os"
 )
 
@@ -28,6 +30,17 @@ var clCmd = &cobra.Command{
 	},
 }
 
+var imgLsCmd = &cobra.Command{
+	Use:     "ls",
+	Aliases: []string{"compare"},
+	Short:   "Compare lists",
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := img.CompareImagesLists(); err != nil {
+			fmt.Println("Error:", err)
+		}
+	},
+}
+
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -38,7 +51,7 @@ func Execute() {
 func init() {
 	rootCmd.DisableAutoGenTag = true
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.AddCommand(clCmd)
+	rootCmd.AddCommand(clCmd, imgLsCmd)
 
 	rootCmd.PersistentFlags().StringVarP(&env.EnvConfigFile, "env", "e", "defaultEnv.json", "Default environment configuration file; this is a per-user setting.")
 }

@@ -50,7 +50,7 @@ func LoadEnvironmentFile() (DockerRegistryCreds, error) {
 	}
 }
 
-// Save the above structure into a JSON file in the user's .config/certificatemanager directory
+// Save the above structure into a JSON file in the user's .config directory
 func (e DockerRegistryCreds) SaveEnvironmentFile(outputfile string) error {
 	if outputfile == "" {
 		outputfile = EnvConfigFile
@@ -73,9 +73,9 @@ func fetchRepoInfo(prompt string) DockerRegistry {
 
 	repo.Name = getStringVal("Please enter the friendly repo name (ENTER to quit): ")
 	repo.URL = getStringVal("Please enter the repo URL: ")
-	if !strings.HasSuffix(repo.URL, "/") {
-		repo.URL += "/"
-	}
+	//if !strings.HasSuffix(repo.URL, "/") {
+	//	repo.URL += "/"
+	//}
 	repo.Username = getStringVal("Please enter the username needed to login: ")
 	repo.Password = helpers.EncodeString(helpers.GetPassword("Please enter that user's password: "))
 
