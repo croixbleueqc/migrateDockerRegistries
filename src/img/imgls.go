@@ -7,10 +7,11 @@ package img
 
 import (
 	"context"
+	"github.com/docker/docker/api/types/registry"
+
 	//"encoding/base64"
 	"fmt"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/registry"
 	"migrateDockerRegistries/auth"
 	"migrateDockerRegistries/env"
 	"migrateDockerRegistries/helpers"
@@ -48,12 +49,15 @@ func getImages(regInfo env.DockerRegistry) ([]string, error) {
 	cli := auth.ClientConnect(regInfo.URL)
 	authConfig := registry.AuthConfig{
 		Username: regInfo.Username,
-		Password: regInfo.Password,
+		Password: helpers.DecodeString(regInfo.Password),
 	}
+	//authCfg := auth.EncodeToken(regInfo)
+
 	cli.RegistryLogin(context.Background(), authConfig)
+	cli.NegotiateAPIVersion(context.Background())
 
 	// Fetch a list of images from the registry
-	imageList, err := cli.ImageList(context.Background(), types.ImageListOptions{})
+	imageList, err := cli.ImageList(context.Background(), types.ImageListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}
