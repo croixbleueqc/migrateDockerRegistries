@@ -7,15 +7,16 @@ package img
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/docker/docker/api/types/registry"
+	"io/ioutil"
+	"net/http"
 
 	//"encoding/base64"
 	"fmt"
-	"github.com/docker/docker/api/types"
-	"migrateDockerRegistries/auth"
+	"migrateDockerRegistries/connection"
 	"migrateDockerRegistries/env"
 	"migrateDockerRegistries/helpers"
-	"sort"
 )
 
 func CompareImagesLists() error {
@@ -23,77 +24,112 @@ func CompareImagesLists() error {
 	var err error
 	var srcImgs, dstImgs []string
 
+	// load config from environment file
 	if registries, err = env.LoadEnvironmentFile(); err != nil {
 		return err
 	}
 
-	if srcImgs, err = getImages(registries.Source); err != nil {
+	// fetches all images+tags from source registry
+	if srcImgs, err = listImages(registries.Source); err != nil {
 		return helpers.CustomError{fmt.Sprintf("%s: %s\n", helpers.Red("Unable to list images in source: "), err.Error())}
 	}
-	if dstImgs, err = getImages(registries.Dest); err != nil {
+
+	// fetches all images+tags from destination registry
+	if dstImgs, err = listImages(registries.Dest); err != nil {
 		return helpers.CustomError{fmt.Sprintf("%s: %s\n", helpers.Red("Unable to list images in destination: "), err.Error())}
 	}
-	missingImgs := compareImagesList(srcImgs, dstImgs)
 
+	// find images that are in first registry but not in second
+	//missingImgs := compareImagesList(srcImgs, dstImgs)
+
+	// for now: simply print the results
 	fmt.Printf("Images present in %s but not in %s:\n",
 		helpers.Blue(registries.Source.URL), helpers.Blue(registries.Dest.URL))
 	for _, image := range missingImgs {
 		fmt.Println(image)
 	}
-
 	return nil
 }
 
 // Lists images from given registry
-func getImages(regInfo env.DockerRegistry) ([]string, error) {
-	cli := auth.ClientConnect(regInfo.URL)
+func listImages(regInfo env.DockerRegistry) ([]Repository, error) {
+	cli := connection.ClientConnect(false)
 	authConfig := registry.AuthConfig{
-		Username: regInfo.Username,
-		Password: helpers.DecodeString(regInfo.Password),
+		Username:      regInfo.Username,
+		Password:      helpers.DecodeString(regInfo.Password),
+		ServerAddress: regInfo.URL,
 	}
-	//authCfg := auth.EncodeToken(regInfo)
+	authToken := connection.EncodeToken(regInfo)
 
 	cli.RegistryLogin(context.Background(), authConfig)
 	cli.NegotiateAPIVersion(context.Background())
 
-	// Fetch a list of images from the registry
-	imageList, err := cli.ImageList(context.Background(), types.ImageListOptions{All: true})
+	// build the http request, with Authorization http header
+	repoListURL := regInfo.URL + "/v2/_catalog"
+	req, err := http.NewRequest("GET", repoListURL, nil)
+	if err != nil {
+		return nil, helpers.CustomError{fmt.Sprintf("Error fetching list from %s: %s", regInfo.URL, err)}
+	}
+	req.Header.Set("Authorization", "Basic "+authToken)
+
+	//
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Decode response: JSON->repoList
+	var repoList RepositoryList
+	body, err := os.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(body, &repoList)
 	if err != nil {
 		return nil, err
 	}
 
-	var images []string
-	for _, image := range imageList {
-		for _, tag := range image.RepoTags {
-			images = append(images, tag)
+	// Fetch tags for each repository
+	for i, repo := range repoList.Repositories {
+		tags, err := fetchTags(regInfo.URL, repo, authToken)
+		if err != nil {
+			return nil, err
 		}
+		repoList.Repositories[i].Tags = tags
 	}
-	return images, nil
+
+	return repoList.Repositories, nil
 }
 
-// Compares the lists from both registries
-func compareImagesList(srcLst, dstLst []string) []string {
-	sort.Strings(srcLst)
-	sort.Strings(dstLst)
+func fetchTags(registryURL, repository, encodedAuth string) ([]string, error) {
+	//ctx := context.Background()
 
-	var missingImages []string
-
-	// Compare source and target lists
-	for _, sourceImage := range srcLst {
-		if !contains(dstLst, sourceImage) {
-			missingImages = append(missingImages, sourceImage)
-		}
+	// Make a request to list tags for a repository
+	tagsListURL := registryURL + "/v2/" + repository + "/tags/list"
+	req, err := http.NewRequest("GET", tagsListURL, nil)
+	if err != nil {
+		return nil, err
 	}
-	return missingImages
-}
+	req.Header.Set("Authorization", "Basic "+encodedAuth)
 
-// checks if a given element is part of the list
-// not really efficient, especially for large lists
-func contains(list []string, element string) bool {
-	for _, e := range list {
-		if e == element {
-			return true
-		}
+	// Send the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
-	return false
+	defer resp.Body.Close()
+
+	// Decode the response into a list of tags
+	var tagsList TagsList
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(body, &tagsList)
+	if err != nil {
+		return nil, err
+	}
+
+	return tagsList.Tags, nil
 }

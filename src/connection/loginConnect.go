@@ -1,9 +1,9 @@
 // migrateDockerRegistries
 // Written by J.F. Gratton <jean-francois@famillegratton.net>
-// Original filename: src/auth/login.go
+// Original filename: src/connection/loginConnect.go
 // Original timestamp: 2024/01/13 12:31
 
-package auth
+package connection
 
 import (
 	"encoding/base64"
@@ -14,13 +14,17 @@ import (
 	"os"
 )
 
-func ClientConnect(uri string) *client.Client {
+func ClientConnect(showHostInfo bool) *client.Client {
+	uri := buildConnectURI()
 	cli, err := client.NewClientWithOpts(client.WithHost(uri), client.WithAPIVersionNegotiation())
 	if err != nil {
 		fmt.Printf("Unable to create docker client: %s\n", err)
 		os.Exit(-1)
 	}
 
+	if showHostInfo {
+		showHost(uri, showHostInfo)
+	}
 	return cli
 }
 

@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"migrateDockerRegistries/connection"
 	"migrateDockerRegistries/env"
 	"migrateDockerRegistries/helpers"
 	"migrateDockerRegistries/img"
@@ -54,4 +55,5 @@ func init() {
 	rootCmd.AddCommand(clCmd, imgLsCmd)
 
 	rootCmd.PersistentFlags().StringVarP(&env.EnvConfigFile, "env", "e", "defaultEnv.json", "Default environment configuration file; this is a per-user setting.")
+	rootCmd.PersistentFlags().StringVarP(&connection.ConnectURI, "host", "H", "unix:///var/run/docker.sock", "Remote host:port to connect to")
 }
