@@ -19,8 +19,6 @@ URL:        https://git.famillegratton.net:3000/devops/migrateDockerRegistries
 Source0:    %{name}-%{_version}.tar.gz
 BuildArchitectures: x86_64
 BuildRequires: gcc
-#Requires: sudo
-#Obsoletes: vmman1 > 1.140
 
 %description
 Migrate a docker registry onto another
