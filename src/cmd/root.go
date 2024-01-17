@@ -17,7 +17,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "migrateDockerRegistries",
 	Short:   "Add a short description here",
-	Version: "1.01.00-0 (2024.01.17)",
+	Version: "1.02.00-0 (2024.01.17)",
 	Long: `This tools allows you to a software directory structure.
 This follows my template and allows you with minimal effort to package your software once built`,
 }

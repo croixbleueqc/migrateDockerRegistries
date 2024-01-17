@@ -7,28 +7,15 @@ package img
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"migrateDockerRegistries/helpers"
 	"net/http"
+	"os"
+	"strings"
 )
 
-// RepositoryList represents the response from the /v2/_catalog endpoint
-type RepositoryList struct {
-	Repositories []Repository `json:"repositories"`
-}
-
-// Repository represents a Docker repository
-type Repository struct {
-	Name string   `json:"name"`
-	Tags []string `json:"tags"`
-}
-
-// TagsList represents the response from the /v2/<repository>/tags/list endpoint
-type TagsList struct {
-	Name string   `json:"name"`
-	Tags []string `json:"tags"`
-}
-
+// fetchJSON() : generic function used to either pick the image list or an image available tag
 func fetchJSON(url string) (map[string]interface{}, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -48,4 +35,71 @@ func fetchJSON(url string) (map[string]interface{}, error) {
 	}
 
 	return data, nil
+}
+
+// getRepoTags() : fetch all images, and then for each image, all of its tags
+func getRepoTags(registryURL string) ([]string, error) {
+	// Fetch list of repo+tags from the registry
+	catalogPath := "/v2/_catalog"
+	repos, err := fetchJSON(registryURL + catalogPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var repoTags []string
+
+	// Fetch tags for each repository
+	for _, repo := range repos["repositories"].([]interface{}) {
+		tagsPath := fmt.Sprintf("/v2/%s/tags/list", repo.(string))
+		tags, err := fetchJSON(registryURL + tagsPath)
+		if err != nil {
+			return nil, err
+		}
+
+		// Construct repo+tags and add to the list
+		for _, tag := range tags["tags"].([]interface{}) {
+			repoTags = append(repoTags, fmt.Sprintf("%s:%s", repo, tag.(string)))
+		}
+	}
+
+	return repoTags, nil
+}
+
+func compareLists(url string, orgList, dstList []string) []string {
+	var finalList []string
+
+	// Identify repo+tags in orgList but not in dstList
+	for _, repoTag := range orgList {
+		if !contains(dstList, repoTag) {
+			repo := stripProtocol(url) + repoTag
+			finalList = append(finalList, repo)
+		}
+	}
+
+	return finalList
+}
+
+func contains(list []string, item string) bool {
+	for _, val := range list {
+		if val == item {
+			return true
+		}
+	}
+	return false
+}
+
+func saveListToFile(filename string, list []string) error {
+	data := []byte(strings.Join(list, "\n"))
+	err := os.WriteFile(filename, data, 0644)
+
+	return err
+}
+
+func stripProtocol(url string) string {
+	// The following might seem nonsensical, but is needed to ensure we have a well-formatted URL
+	url = strings.TrimPrefix(url, "https://")
+	url = strings.TrimPrefix(url, "http://")
+	url = strings.TrimSuffix(url, "/")
+	url += "/"
+	return url
 }
