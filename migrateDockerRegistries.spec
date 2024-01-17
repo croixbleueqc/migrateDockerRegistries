@@ -1,13 +1,13 @@
 %define debug_package   %{nil}
 %define _build_id_links none
-%define _name "migrateDockerRegistries"
+%define _name migrateDockerRegistries
 %define _prefix /opt
 %define _version 1.01.00
 %define _rel 0
 %define _arch x86_64
 %define _binaryname migrateDockerRegistries
 
-Name:       "migrateDockerRegistries"
+Name:       migrateDockerRegistries
 Version:    %{_version}
 Release:    %{_rel}
 Summary:    Migrate a docker registry onto another
@@ -54,3 +54,6 @@ install -Dpm 0755 %{_sourcedir}/%{_binaryname} %{buildroot}%{_bindir}/%{_binaryn
 
 
 %changelog
+* Wed Jan 17 2024 RPM Builder <builder@famillegratton.net> 1.01.00-0
+- new package built with tito
+
