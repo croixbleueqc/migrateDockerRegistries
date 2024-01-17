@@ -52,6 +52,14 @@ install -Dpm 0755 %{_sourcedir}/%{_binaryname} %{buildroot}%{_bindir}/%{_binaryn
 
 
 %changelog
+* Wed Jan 17 2024 RPM Builder <builder@famillegratton.net> 1.02.00-0
+- Completed minor refactoring and more verbose output (jean-
+  francois@famillegratton.net)
+- Completed minor refactoring and more verbose output (jean-
+  francois@famillegratton.net)
+- Fixed Makefile (incorrect arch) (builder@famillegratton.net)
+- Specfile fix (builder@famillegratton.net)
+
 * Wed Jan 17 2024 RPM Builder <builder@famillegratton.net> 1.01.00-0
 - new package built with tito
 
