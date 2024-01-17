@@ -100,6 +100,5 @@ func stripProtocol(url string) string {
 	url = strings.TrimPrefix(url, "https://")
 	url = strings.TrimPrefix(url, "http://")
 	url = strings.TrimSuffix(url, "/")
-	url += "/"
-	return url
+	return url + "/"
 }
