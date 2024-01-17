@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PKGDIR="migrateDockerRegistries-1.02.00-0_amd64"
+PKGDIR="migrateDockerRegistries-1.10.00-0_amd64"
 
 mkdir -p ${PKGDIR}/opt/bin ${PKGDIR}/DEBIAN
 mkdir -p ${PKGDIR}/opt/bin ${PKGDIR}/DEBIAN
