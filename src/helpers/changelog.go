@@ -19,6 +19,7 @@ func ChangeLog() {
 	fmt.Print(`
 VERSION			DATE			COMMENT
 -------			----			-------
+1.01.00			2024.01.17		rewrote most of it to use Docker's Registry API'
 1.00.00			2024.01.11		initial version
 `)
 }
