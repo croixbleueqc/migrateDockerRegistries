@@ -44,9 +44,20 @@ func CompareImagesLists() error {
 		return helpers.CustomError{fmt.Sprintf("Unable to save the destination registry's list: %s", err)}
 	}
 	fmt.Printf("\n%s\n", helpers.Blue("Comparing both lists"))
-	finalList := compareLists(registries.Source.URL, orgList, destList)
+	finalList, rtS := compareLists(registries.Source.URL, orgList, destList)
 	if err = saveListToFile(registries.Source.Name+"-"+registries.Dest.Name+".txt", finalList); err != nil {
 		return helpers.CustomError{fmt.Sprintf("Unable to save the final list: %s", err)}
+	}
+
+	// Save previous list as JSON... There is no need for such, right now, but I'd rather have
+	// the functionality baked in right now
+	if err = saveJSON(registries.Source.Name+"-"+registries.Dest.Name+".json", rtS); err != nil {
+		return helpers.CustomError{fmt.Sprintf("Unable to save the json file: %s", err)}
+	}
+	if Retag {
+		if err = retagImages(registries); err != nil {
+			return helpers.CustomError{fmt.Sprintf("Unable to write command script %s\n", err)}
+		}
 	}
 
 	fmt.Printf("\nImage listing completed\n")

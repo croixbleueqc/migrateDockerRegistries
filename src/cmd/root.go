@@ -16,10 +16,11 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "migrateDockerRegistries",
-	Short:   "Add a short description here",
-	Version: "1.02.00-0 (2024.01.17)",
-	Long: `This tools allows you to a software directory structure.
-This follows my template and allows you with minimal effort to package your software once built`,
+	Short:   "Docker registries migration tool",
+	Version: "1.10.00-0 (2024.01.17)",
+	Long: `This tool lists all images+tags from a source docker registry, then does the same on a destination registry.
+Once both lists compiled, a third list is generated with all the images+tags missing in the second registry.
+Then, optionally, you can have a shell script that retags all those missing images+tags, and (another option) create the push command.`,
 }
 
 var clCmd = &cobra.Command{
@@ -56,4 +57,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&env.EnvConfigFile, "env", "e", "defaultEnv.json", "Default environment configuration file; this is a per-user setting.")
 	rootCmd.PersistentFlags().StringVarP(&connection.ConnectURI, "host", "H", "unix:///var/run/docker.sock", "Remote host:port to connect to")
+	imgLsCmd.PersistentFlags().BoolVarP(&img.Retag, "retag", "r", false, "Create a command (shell) file retagging all missing images to the new repo name")
+	imgLsCmd.PersistentFlags().BoolVarP(&img.Push, "push", "p", false, "Add a docker push command to the above shell file")
+	imgLsCmd.PersistentFlags().BoolVarP(&img.DeleteOrg, "delete", "d", false, "Add a docker push command to the above shell file")
 }

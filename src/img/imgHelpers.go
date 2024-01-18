@@ -12,8 +12,16 @@ import (
 	"migrateDockerRegistries/helpers"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+type RepoTagStruct struct {
+	RepoName string `json:"reponame"`
+	ImageTag string `json:"imagetag"`
+}
+
+var Retag, Push, DeleteOrg bool
 
 // fetchJSON() : generic function used to either pick the image list or an image available tag
 func fetchJSON(url string) (map[string]interface{}, error) {
@@ -65,18 +73,22 @@ func getRepoTags(registryURL string) ([]string, error) {
 	return repoTags, nil
 }
 
-func compareLists(url string, orgList, dstList []string) []string {
+func compareLists(url string, orgList, dstList []string) ([]string, []RepoTagStruct) {
 	var finalList []string
+	var finalrepotagStruct []RepoTagStruct
+	//var finalrepotag RepoTagStruct
 
 	// Identify repo+tags in orgList but not in dstList
 	for _, repoTag := range orgList {
 		if !contains(dstList, repoTag) {
 			repo := stripProtocol(url) + repoTag
+			finalrepotag := RepoTagStruct{RepoName: url, ImageTag: repoTag}
+			finalrepotagStruct = append(finalrepotagStruct, finalrepotag)
 			finalList = append(finalList, repo)
 		}
 	}
 
-	return finalList
+	return finalList, finalrepotagStruct
 }
 
 func contains(list []string, item string) bool {
@@ -101,4 +113,15 @@ func stripProtocol(url string) string {
 	url = strings.TrimPrefix(url, "http://")
 	url = strings.TrimSuffix(url, "/")
 	return url + "/"
+}
+
+func saveJSON(filename string, repotaglistJson []RepoTagStruct) error {
+	jStream, err := json.MarshalIndent(repotaglistJson, "", "  ")
+	if err != nil {
+		return err
+	}
+	rcFile := filepath.Join(filename)
+	err = os.WriteFile(rcFile, jStream, 0600)
+
+	return nil
 }
