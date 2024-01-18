@@ -22,3 +22,5 @@ _SCRATCHPAD/
 *.tar
 *.txt
 *.json
+!src/*.sh
+*.sh
