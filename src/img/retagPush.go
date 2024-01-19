@@ -23,6 +23,7 @@ func retagImages(regs env.DockerRegistryCreds) error {
 }
 
 func createShellScript(regs env.DockerRegistryCreds) error {
+
 	basename := regs.Source.Name + "-" + regs.Dest.Name
 	// read the missing images file
 	inputFile, err := os.Open(basename + ".txt")
@@ -42,13 +43,31 @@ func createShellScript(regs env.DockerRegistryCreds) error {
 	// iterate tru inputfile, manipulate strings, send to output file
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
+		var srcStr, dstStr, delStr, pushStr string
 		lineString := scanner.Text()
-		// safe housekeeping : ensure that we only keep the repotag part of the line
-		//lastSlashIndex := strings.LastIndex(lineString, "/")
 
-		srcStr := lineString[strings.LastIndex(lineString, "/")+1:]
-		dstStr := fmt.Sprintf("docker tag %s/ %s", stripProtocol(regs.Source.URL), stripProtocol(regs.Dest.URL))
-		fmt.Println(srcStr, dstStr)
+		outputFile.WriteString(fmt.Sprintf("docker pull %s\n", lineString))
+
+		srcStr = lineString[strings.LastIndex(lineString, "/")+1:]
+		dstStr = fmt.Sprintf("docker tag %s %s%s\n", lineString, stripProtocol(regs.Dest.URL), srcStr)
+		outputFile.WriteString(dstStr)
+		if DeleteOrg {
+			delStr = fmt.Sprintf("docker rmi %s\n", lineString)
+			outputFile.WriteString(delStr)
+		}
+		if Push {
+			pushStr = fmt.Sprintf("docker push %s%s\n", stripProtocol(regs.Dest.URL), srcStr)
+			outputFile.WriteString(pushStr)
+		}
+		if DeleteOrg || Push {
+			outputFile.WriteString("\n")
+		}
+		os.Chmod(basename+".sh", 0755)
+		//fmt.Printf("lineString: %s\n", lineString)
+		//fmt.Printf("srcStr: %s\n", srcStr)
+		//fmt.Printf("dstStr: %s", dstStr)
+		//fmt.Printf("delStr: %s", delStr)
+		//fmt.Printf("pushStr: %s", pushStr)
 	}
 	return nil
 }

@@ -25,7 +25,7 @@ type DockerRegistry struct {
 
 type DockerRegistryCreds struct {
 	Source DockerRegistry `json:"Source Docker Registry"`
-	Dest   DockerRegistry `json:"Destination DockerRegistry"`
+	Dest   DockerRegistry `json:"Destination Docker Registry"`
 	//ALPINE []Repository `json:"APK"`
 }
 

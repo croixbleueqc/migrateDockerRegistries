@@ -21,7 +21,7 @@ type RepoTagStruct struct {
 	ImageTag string `json:"imagetag"`
 }
 
-var Retag, Push, DeleteOrg bool
+var Retag, Push, DeleteOrg, LatestOnly bool
 
 // fetchJSON() : generic function used to either pick the image list or an image available tag
 func fetchJSON(url string) (map[string]interface{}, error) {
@@ -64,9 +64,15 @@ func getRepoTags(registryURL string) ([]string, error) {
 			return nil, err
 		}
 
-		// Construct repo+tags and add to the list
-		for _, tag := range tags["tags"].([]interface{}) {
-			repoTags = append(repoTags, fmt.Sprintf("%s:%s", repo, tag.(string)))
+		if LatestOnly {
+			if containsTag(tags["tags"].([]interface{}), "latest") {
+				repoTags = append(repoTags, fmt.Sprintf("%s:latest", repo))
+			}
+		} else {
+			// Include all tags
+			for _, tag := range tags["tags"].([]interface{}) {
+				repoTags = append(repoTags, fmt.Sprintf("%s:%s", repo, tag.(string)))
+			}
 		}
 	}
 
@@ -80,7 +86,7 @@ func compareLists(url string, orgList, dstList []string) ([]string, []RepoTagStr
 
 	// Identify repo+tags in orgList but not in dstList
 	for _, repoTag := range orgList {
-		if !contains(dstList, repoTag) {
+		if !containsList(dstList, repoTag) {
 			repo := stripProtocol(url) + repoTag
 			finalrepotag := RepoTagStruct{RepoName: url, ImageTag: repoTag}
 			finalrepotagStruct = append(finalrepotagStruct, finalrepotag)
@@ -91,7 +97,16 @@ func compareLists(url string, orgList, dstList []string) ([]string, []RepoTagStr
 	return finalList, finalrepotagStruct
 }
 
-func contains(list []string, item string) bool {
+func containsList(list []string, item string) bool {
+	for _, val := range list {
+		if val == item {
+			return true
+		}
+	}
+	return false
+}
+
+func containsTag(list []interface{}, item string) bool {
 	for _, val := range list {
 		if val == item {
 			return true

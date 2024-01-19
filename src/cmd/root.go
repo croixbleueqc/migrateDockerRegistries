@@ -33,8 +33,8 @@ var clCmd = &cobra.Command{
 }
 
 var imgLsCmd = &cobra.Command{
-	Use:     "ls",
-	Aliases: []string{"compare"},
+	Use:     "compare",
+	Aliases: []string{"ls"},
 	Short:   "Compare lists",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := img.CompareImagesLists(); err != nil {
@@ -59,5 +59,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&connection.ConnectURI, "host", "H", "unix:///var/run/docker.sock", "Remote host:port to connect to")
 	imgLsCmd.PersistentFlags().BoolVarP(&img.Retag, "retag", "r", false, "Create a command (shell) file retagging all missing images to the new repo name")
 	imgLsCmd.PersistentFlags().BoolVarP(&img.Push, "push", "p", false, "Add a docker push command to the above shell file")
-	imgLsCmd.PersistentFlags().BoolVarP(&img.DeleteOrg, "delete", "d", false, "Add a docker push command to the above shell file")
+	imgLsCmd.PersistentFlags().BoolVarP(&img.DeleteOrg, "delete", "d", false, "Delete the original image after retag")
+	imgLsCmd.PersistentFlags().BoolVarP(&img.LatestOnly, "latest", "l", false, "Only fetches the 'latest' tag from the source registry")
 }
