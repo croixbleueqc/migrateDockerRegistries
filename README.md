@@ -66,7 +66,7 @@ The behaviour of the tool can be modified with the following flags:
 - -l : will fetch only the 'latest' tag from the source repository (defaults to false)
 
 if -r is unset (that is, is false), the following flags are ignored
-- -d : original image is erased after retagging
+- -d : original image/tag is erased after retagging
 - -p : a docker push command is issued in the .sh file with the retagged image
 
 **A FAIR WARNING:** Using the `-r` flag can be very, very consuming, storage-wise, especially on large remote registries. Use with caution
