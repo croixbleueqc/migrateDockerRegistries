@@ -53,6 +53,18 @@ install -Dpm 0755 %{_sourcedir}/%{_binaryname} %{buildroot}%{_bindir}/%{_binaryn
 
 %changelog
 * Fri Jan 19 2024 RPM Builder <builder@famillegratton.net> 1.10.00-0
+- Added missing dependencies (jean-francois@famillegratton.net)
+- Automatic commit of package [migrateDockerRegistries] release [1.10.00-0].
+  (builder@famillegratton.net)
+- Upgraded BuildDeps (jean-francois@famillegratton.net)
+- Completed shell script generation (jean-francois@famillegratton.net)
+- buildDeps update (jean-francois@famillegratton.net)
+- Update .gitignore (jean-francois@famillegratton.net)
+- bergen-> (jean-francois@famillegratton.net)
+- release bump (jean-francois@famillegratton.net)
+- Doc update (jean-francois@famillegratton.net)
+
+* Fri Jan 19 2024 RPM Builder <builder@famillegratton.net> 1.10.00-0
 - Upgraded BuildDeps (jean-francois@famillegratton.net)
 - Completed shell script generation (jean-francois@famillegratton.net)
 - buildDeps update (jean-francois@famillegratton.net)
