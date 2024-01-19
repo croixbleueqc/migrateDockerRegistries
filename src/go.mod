@@ -3,7 +3,7 @@ module migrateDockerRegistries
 go 1.21.6
 
 require (
-	github.com/docker/docker v24.0.7+incompatible
+	github.com/docker/docker v25.0.0+incompatible
 	github.com/jwalton/gchalk v1.3.0
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.18.0
