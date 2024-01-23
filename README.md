@@ -16,7 +16,7 @@ This means, that we need a way to define and work with these tuples, hence the c
 
 ## Environments
 
-### The idea behind environment
+### The idea behind environments
 All tuple is defined in its own *environment file*. Those files are stored in $HOME/.config/JFG/migrateDockerRegistries/. A sample file is generated at run time, `sample.json`
 
 By default, the software is using `defaultEnv.json`. You can override this with the `-e` flag, followed by a filename.
@@ -52,7 +52,7 @@ It's very simple. Assuming you have a valid `$HOME/.config/JFG/migrateDockerRegi
 
 `migrateDockerRegistries [-H HOST] [-e ENVFILE] {compare|ls} [-d] [-l] [-p] [-r]`.
 
-The way tool works is quite simple :
+The way the tool works is quite simple :
 1. All images + tags (default behaviour) are fetched from the source docker registry. The list is then written in a file named
  REPONAME.txt, NEXUS.txt, with the above environment file.
 2. All images + tags (default behaviour) are fetched from the destination docker registry. The list is then written in a file named
@@ -69,7 +69,6 @@ if -r is unset (that is, is false), the following flags are ignored
 - -d : original image/tag is erased after retagging
 - -p : a docker push command is issued in the .sh file with the retagged image
 
-**A FAIR WARNING:** Using the `-r` flag can be very, very consuming, storage-wise, especially on large remote registries. Use with caution
 
 **SEE FIXME-TODO.md on this**
 
