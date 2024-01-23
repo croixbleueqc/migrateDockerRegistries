@@ -21,7 +21,7 @@ type RepoTagStruct struct {
 	ImageTag string `json:"imagetag"`
 }
 
-var Retag, Push, DeleteOrg, LatestOnly bool
+var Retag, Push, Delete, LatestOnly bool
 
 // fetchJSON() : generic function used to either pick the image list or an image available tag
 func fetchJSON(url string) (map[string]interface{}, error) {

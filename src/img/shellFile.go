@@ -1,6 +1,6 @@
 // migrateDockerRegistries
 // Written by J.F. Gratton <jean-francois@famillegratton.net>
-// Original filename: src/img/retagPush.go
+// Original filename: src/img/shellFile.go
 // Original timestamp: 2024/01/17 15:43
 
 package img
@@ -23,7 +23,6 @@ func retagImages(regs env.DockerRegistryCreds) error {
 }
 
 func createShellScript(regs env.DockerRegistryCreds) error {
-
 	basename := regs.Source.Name + "-" + regs.Dest.Name
 	// read the missing images file
 	inputFile, err := os.Open(basename + ".txt")
@@ -46,28 +45,28 @@ func createShellScript(regs env.DockerRegistryCreds) error {
 		var srcStr, dstStr, delStr, pushStr string
 		lineString := scanner.Text()
 
-		outputFile.WriteString(fmt.Sprintf("docker pull %s\n", lineString))
+		outputFile.WriteString(fmt.Sprintf("echo Pulling: %s\n", lineString))
+		outputFile.WriteString(fmt.Sprintf("docker pull -q %s\n", lineString))
 
 		srcStr = lineString[strings.LastIndex(lineString, "/")+1:]
 		dstStr = fmt.Sprintf("docker tag %s %s%s\n", lineString, stripProtocol(regs.Dest.URL), srcStr)
 		outputFile.WriteString(dstStr)
-		if DeleteOrg {
+		if Delete {
 			delStr = fmt.Sprintf("docker rmi %s\n", lineString)
 			outputFile.WriteString(delStr)
 		}
 		if Push {
-			pushStr = fmt.Sprintf("docker push %s%s\n", stripProtocol(regs.Dest.URL), srcStr)
+			outputFile.WriteString(fmt.Sprintf("echo Pushing: %s\n", stripProtocol(regs.Dest.URL), srcStr))
+			pushStr = fmt.Sprintf("docker push -q %s%s\n", stripProtocol(regs.Dest.URL), srcStr)
 			outputFile.WriteString(pushStr)
+			if Delete {
+				outputFile.WriteString(fmt.Sprintf("docker rmi %s%s\n", stripProtocol(regs.Dest.URL), srcStr))
+			}
 		}
-		if DeleteOrg || Push {
+		if Delete || Push {
 			outputFile.WriteString("\n")
 		}
 		os.Chmod(basename+".sh", 0755)
-		//fmt.Printf("lineString: %s\n", lineString)
-		//fmt.Printf("srcStr: %s\n", srcStr)
-		//fmt.Printf("dstStr: %s", dstStr)
-		//fmt.Printf("delStr: %s", delStr)
-		//fmt.Printf("pushStr: %s", pushStr)
 	}
 	return nil
 }
